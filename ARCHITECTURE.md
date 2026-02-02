@@ -100,6 +100,7 @@ El núcleo de los recolectores ha sido diseñado para operar de forma autónoma 
 | **Collectors** | Extraen datos de APIs externas (REST/JSON) y los normalizan. | Python 3.11 + psycopg2 |
 | **PostgreSQL** | Almacenamiento persistente con bases de datos aisladas por servicio. | PostgreSQL 15 |
 | **Health Check** | Sistema de "Heartbeat" donde cada colector reporta su estado. | SQL (Central DB) |
+| **Notifier** | Monitorea la DB en busca de errores y envía alertas. | Python + Webhooks |
 | **Grafana** | Visualización multifuente y gestión de alertas. | Grafana 10 |
 
 ## 🔄 Flujo de Datos

@@ -6,7 +6,8 @@ Una solución integral y unificada para la recolección, almacenamiento y visual
 
 ## 🚀 Características Principales
 
-*   **Centralización Total**: Monitoreo de Jenkins, SonarQube y Jira en un solo ecosistema.
+*   **Centralización Total**: Monitoreo de Jenkins, SonarQube, Jira, ArgoCD, Argo Rollouts y Git (DORA) en un solo ecosistema.
+*   **Notificaciones Proactivas**: Sistema de alertas autónomo que notifica fallos vía Slack/Discord.
 *   **Infraestructura Eficiente**: Uso de una única instancia de PostgreSQL y Grafana para múltiples fuentes de datos.
 *   **Inicialización Auto-Suficiente**: Scripts SQL automáticos que crean bases de datos, tablas y permisos al arrancar.
 *   **Dashboards "Out-of-the-Box"**: Paneles de Grafana pre-configurados para visualización inmediata.
@@ -109,11 +110,11 @@ Una solución integral y unificada para la recolección, almacenamiento y visual
 | `POSTGRES_DB` | Base de datos principal de configuración | `metrics_main` |
 
 ### Monitoreo de Logs
+### Monitoreo de Logs
 Para verificar la salud de los colectores:
 ```bash
 docker logs jenkins-metrics-collector -f
-docker logs sonarqube-metrics-collector -f
-docker logs jira-metrics-collector -f
+docker logs metrics-notifier -f
 ```
 
 ---
