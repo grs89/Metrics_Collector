@@ -87,6 +87,30 @@ services:
     networks:
       - metrics-net
 
+  jira-collector:
+    build:
+      context: ./exporters/jira
+      dockerfile: Dockerfile
+    container_name: jira-metrics-collector
+    restart: unless-stopped
+    environment:
+      - JIRA_URL=${JIRA_URL}
+      - JIRA_USER=${JIRA_USER}
+      - JIRA_TOKEN=${JIRA_TOKEN}
+      - JIRA_PROJECTS=${JIRA_PROJECTS}
+      - JIRA_POLL_INTERVAL=${JIRA_POLL_INTERVAL:-3600}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=jira_metrics
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-admin123}
+      - DATA_RETENTION_DAYS=${DATA_RETENTION_DAYS:-365}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - metrics-net
+
 networks:
   metrics-net:
     driver: bridge

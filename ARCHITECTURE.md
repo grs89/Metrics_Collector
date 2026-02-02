@@ -13,12 +13,14 @@ graph TD
     subgraph "External Services"
         Jenkins["Jenkins Server"]
         Sonar["SonarQube Server"]
+        Jira["Jira Software"]
     end
 
     subgraph "Metrics Collector Infrastructure (Docker/K8s)"
         subgraph "Collectors (Python 3.11)"
             JC["Jenkins Collector"]
             SC["SonarQube Collector"]
+            JRC["Jira Collector"]
         end
 
         subgraph "Storage & Visibility"
@@ -30,9 +32,11 @@ graph TD
     %% Flow
     Jenkins -->|"API REST / JSON"| JC
     Sonar -->|"API REST / JSON"| SC
+    Jira -->|"API REST / JSON"| JRC
     
     JC -->|"SQL (jenkins_metrics)"| DB
     SC -->|"SQL (sonarqube_metrics)"| DB
+    JRC -->|"SQL (jira_metrics)"| DB
     
     DB -->|"Data Source"| GF
     GF -->|"Visualization"| User((DevOps Team))

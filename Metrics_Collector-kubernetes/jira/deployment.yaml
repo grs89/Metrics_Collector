@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jira-collector
+  namespace: jenkins-metrics
+  labels:
+    app: jira-collector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jira-collector
+  template:
+    metadata:
+      labels:
+        app: jira-collector
+    spec:
+      containers:
+      - name: jira-collector
+        image: gersonofstone/jira-metrics-collector:latest
+        env:
+        - name: JIRA_URL
+          valueFrom:
+            configMapKeyRef:
+              name: jira-config
+              key: jira_url
+        - name: JIRA_USER
+          valueFrom:
+            secretKeyRef:
+              name: jira-secrets
+              key: jira_user
+        - name: JIRA_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: jira-secrets
+              key: jira_token
+        - name: JIRA_PROJECTS
+          valueFrom:
+            configMapKeyRef:
+              name: jira-config
+              key: jira_projects
+        - name: JIRA_POLL_INTERVAL
+          valueFrom:
+            configMapKeyRef:
+              name: jira-config
+              key: jira_poll_interval
+        - name: POSTGRES_HOST
+          value: "postgres"
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_DB
+          value: "jira_metrics"
+        - name: POSTGRES_USER
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secrets
+              key: postgres_user
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secrets
+              key: postgres_password
+        - name: DATA_RETENTION_DAYS
+          value: "365"

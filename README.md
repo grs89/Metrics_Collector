@@ -6,7 +6,7 @@ Una solución integral y unificada para la recolección, almacenamiento y visual
 
 ## 🚀 Características Principales
 
-*   **Centralización Total**: Monitoreo de Jenkins y SonarQube en un solo ecosistema.
+*   **Centralización Total**: Monitoreo de Jenkins, SonarQube y Jira en un solo ecosistema.
 *   **Infraestructura Eficiente**: Uso de una única instancia de PostgreSQL y Grafana para múltiples fuentes de datos.
 *   **Inicialización Auto-Suficiente**: Scripts SQL automáticos que crean bases de datos, tablas y permisos al arrancar.
 *   **Dashboards "Out-of-the-Box"**: Paneles de Grafana pre-configurados para visualización inmediata.
@@ -60,6 +60,7 @@ Una solución integral y unificada para la recolección, almacenamiento y visual
 
 3.  **Acceso**:
     *   **Grafana**: `http://localhost:3000` (Usuario/Pass definidos en `.env`).
+    *   **Dashboard Jira**: `http://localhost:3000/d/jira-overview`
     *   **Postgres**: Accesible internamente en el puerto `5432`.
 
 ### ☸️ Kubernetes
@@ -79,6 +80,9 @@ Una solución integral y unificada para la recolección, almacenamiento y visual
     
     # Desplegar SonarQube Collector
     kubectl apply -k Metrics_Collector-kubernetes/sonarqube/
+    
+    # Desplegar Jira Collector
+    kubectl apply -k Metrics_Collector-kubernetes/jira/
     ```
 
 ---
@@ -99,6 +103,7 @@ Para verificar la salud de los colectores:
 ```bash
 docker logs jenkins-metrics-collector -f
 docker logs sonarqube-metrics-collector -f
+docker logs jira-metrics-collector -f
 ```
 
 ---

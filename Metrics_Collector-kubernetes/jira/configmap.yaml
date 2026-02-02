@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: jira-config
+  namespace: jenkins-metrics
+data:
+  jira_url: "https://your-domain.atlassian.net"
+  jira_projects: "PROJ1,PROJ2"
+  jira_poll_interval: "3600"
