@@ -1,50 +1,108 @@
-# Metrics Collector All-in-One.
+# 📊 Metrics Collector All-in-One
 
-Este proyecto consolida los colectores de métricas de **Jenkins** y **SonarQube** en una única solución unificada, optimizando recursos mediante el uso compartido de infraestructura (Postgres y Grafana).
+Una solución integral y unificada para la recolección, almacenamiento y visualización de métricas críticas de **Jenkins** y **SonarQube**. Este proyecto optimiza la infraestructura mediante el uso de contenedores compartidos para base de datos y visualización, facilitando el monitoreo de la salud del ciclo de vida de desarrollo de software (SDLC).
 
-## Estructura del Proyecto
+---
 
-- `docker/`: Configuración unificada para despliegues con Docker Compose.
-- `kubernetes/`: Manifiestos organizados para despliegues en Kubernetes (Base, Jenkins, SonarQube).
-- `exporters/`: Código fuente de los colectores (Python).
+## 🚀 Características Principales
 
-## Despliegue con Docker
+*   **Centralización Total**: Monitoreo de Jenkins y SonarQube en un solo ecosistema.
+*   **Infraestructura Eficiente**: Uso de una única instancia de PostgreSQL y Grafana para múltiples fuentes de datos.
+*   **Inicialización Auto-Suficiente**: Scripts SQL automáticos que crean bases de datos, tablas y permisos al arrancar.
+*   **Dashboards "Out-of-the-Box"**: Paneles de Grafana pre-configurados para visualización inmediata.
+*   **Gestión de Retención**: Limpieza automática de datos antiguos (configurable en días) para mantener el rendimiento.
+*   **Dual-Deployment**: Soporte nativo y optimizado tanto para **Docker Compose** como para **Kubernetes**.
 
-1. Navega al directorio `docker`:
-   ```bash
-   cd docker
-   ```
-2. Copia el archivo de ejemplo de variables de entorno y configuralo:
-   ```bash
-   cp .env.example .env
-   # Edita .env con tus credenciales
-   ```
-3. Inicia los servicios:
-   ```bash
-   docker-compose up -d
-   ```
+---
 
-## Despliegue con Kubernetes
+## 🛠️ Tech Stack
 
-Los manifiestos están divididos en:
-- `base/`: Infraestructura compartida (Namespace, Postgres, Grafana).
-- `jenkins/`: Despliegue específico del colector de Jenkins.
-- `sonarqube/`: Despliegue específico del colector de SonarQube.
+*   **Backend**: Python 3.11 (Exporters personalizados).
+*   **Database**: PostgreSQL 15 (Alpine based).
+*   **Visualization**: Grafana 10.
+*   **Orchestration**: Docker Compose & Kubernetes (Kustomize ready).
 
-Para desplegar:
-1. Crea los secretos necesarios.
-2. Aplica la configuración base:
-   ```bash
-   kubectl apply -f kubernetes/base/
-   ```
-3. Aplica los colectores:
-   ```bash
-   kubectl apply -f kubernetes/jenkins/
-   ```
-4. Repite para SonarQube.
+---
 
-## Dashboards
+## 📂 Estructura del Proyecto
 
-Grafana viene pre-configurado con dashboards para ambos servicios en el puerto `3000`.
-- **Jenkins Overview**: Métricas generales de jobs.
-- **SonarQube Projects**: Estado de calidad de código.
+```text
+.
+├── Metrics_Collector-docker/    # Configuración de contenedores local/vps
+│   ├── exporters/               # Código fuente de los recolectores Python
+│   ├── grafana/                 # Provisioning de dashboards y datasources
+│   ├── postgres/                # Scripts de inicialización y datos
+│   └── docker-compose.yml       # Orquestación de servicios
+├── Metrics_Collector-kubernetes/# Manifiestos para infraestructura cloud
+│   ├── base/                    # Infraestructura compartida (Postgres, Grafana)
+│   ├── jenkins/                 # Manifiestos específicos del recolector Jenkins
+│   └── sonarqube/               # Manifiestos específicos del recolector SonarQube
+└── README.md                    # Documentación principal
+```
+
+---
+
+## ⚙️ Instalación y Despliegue
+
+### 🐳 Docker Compose (Recomendado para inicio rápido)
+
+1.  **Configura el entorno**:
+    ```bash
+    cd Metrics_Collector-docker
+    cp .env.example .env
+    ```
+    *Edita el archivo `.env` con las URLs y Tokens de tus servidores Jenkins y SonarQube.*
+
+2.  **Inicia los servicios**:
+    ```bash
+    docker-compose up -d --build
+    ```
+
+3.  **Acceso**:
+    *   **Grafana**: `http://localhost:3000` (Usuario/Pass definidos en `.env`).
+    *   **Postgres**: Accesible internamente en el puerto `5432`.
+
+### ☸️ Kubernetes
+
+1.  **Desplegar Infraestructura Base**:
+    ```bash
+    kubectl apply -f Metrics_Collector-kubernetes/base/
+    ```
+
+2.  **Configurar Secretos**:
+    Completa los archivos en `Metrics_Collector-kubernetes/jenkins/secrets` y `Metrics_Collector-kubernetes/sonarqube/secrets`.
+
+3.  **Desplegar Colectores**:
+    ```bash
+    # Desplegar Jenkins Collector
+    kubectl apply -k Metrics_Collector-kubernetes/jenkins/
+    
+    # Desplegar SonarQube Collector
+    kubectl apply -k Metrics_Collector-kubernetes/sonarqube/
+    ```
+
+---
+
+## 🔧 Configuración Avanzada
+
+### Variables de Entorno Clave
+
+| Variable | Descripción | Default |
+| :--- | :--- | :--- |
+| `JENKINS_POLL_INTERVAL` | Frecuencia de escaneo de Jenkins (segundos) | `60` |
+| `SONARQUBE_POLL_INTERVAL`| Frecuencia de escaneo de SonarQube (segundos)| `3600` |
+| `DATA_RETENTION_DAYS` | Días que se conservan las métricas históricas | `365` |
+| `POSTGRES_DB` | Base de datos principal de configuración | `metrics_main` |
+
+### Monitoreo de Logs
+Para verificar la salud de los colectores:
+```bash
+docker logs jenkins-metrics-collector -f
+docker logs sonarqube-metrics-collector -f
+```
+
+---
+
+## 📜 Licencia
+
+Este proyecto está bajo la licencia MIT. Consulta el archivo [LICENSE](LICENSE) para más detalles.
