@@ -1,6 +1,6 @@
 # 📊 Metrics Collector All-in-One
 
-Una solución integral y unificada para la recolección, almacenamiento y visualización de métricas críticas de **Jenkins** y **SonarQube**. Este proyecto optimiza la infraestructura mediante el uso de contenedores compartidos para base de datos y visualización, facilitando el monitoreo de la salud del ciclo de vida de desarrollo de software (SDLC).
+Una solución integral y unificada para la recolección, almacenamiento y visualización de métricas críticas de **Jenkins**, **SonarQube**, **Jira**, **ArgoCD** y mas . Este proyecto optimiza la infraestructura mediante el uso de contenedores compartidos para base de datos y visualización, facilitando el monitoreo de la salud del ciclo de vida de desarrollo de software (SDLC).
 
 ---
 
