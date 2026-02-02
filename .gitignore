@@ -1,0 +1,23 @@
+# Environment variables
+.env
+
+# Docker data
+docker/postgres/metrics-db-data/
+docker/grafana/metrics-grafana-data/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

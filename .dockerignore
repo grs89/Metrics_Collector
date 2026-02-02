@@ -1,0 +1,9 @@
+.git
+.gitignore
+.dockerignore
+README.md
+docker/postgres/metrics-db-data/
+docker/grafana/metrics-grafana-data/
+__pycache__/
+*.py[cod]
+.env
