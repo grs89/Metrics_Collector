@@ -1,0 +1,49 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: sonarqube-metrics
+
+resources:
+  # Namespace
+  - namespace.yaml
+  
+  # Configuración
+  - configmap.yaml
+  - secrets.yaml
+  
+  # PostgreSQL
+  - postgres/pvc.yaml
+  - postgres/configmap-init.yaml
+  - postgres/deployment.yaml
+  - postgres/service.yaml
+  
+  # Grafana
+  - grafana/pvc.yaml
+  - grafana/configmap-datasource.yaml
+  - grafana/configmap-dashboard-provider.yaml
+  - grafana/deployment.yaml
+  - grafana/service.yaml
+  
+  # Collector
+  - collector/deployment.yaml
+  
+  # Ingress (opcional - descomentar si lo necesitas)
+  # - ingress.yaml
+
+# ConfigMap de dashboards generado desde archivos JSON
+configMapGenerator:
+  - name: grafana-dashboards
+    namespace: sonarqube-metrics
+    files:
+      - dashboards/sonarqube-overview.json
+      - dashboards/sonarqube-all-projects.json
+
+# Labels comunes
+commonLabels:
+  app.kubernetes.io/managed-by: kustomize
+  app.kubernetes.io/part-of: sonarqube-metrics-stack
+
+# Anotaciones comunes
+commonAnnotations:
+  app.kubernetes.io/version: "1.0.0"
+

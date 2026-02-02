@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: collector
+  namespace: sonarqube-metrics
+  labels:
+    app.kubernetes.io/name: collector
+    app.kubernetes.io/component: data-collector
+    app.kubernetes.io/part-of: sonarqube-metrics-stack
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: collector
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: collector
+        app.kubernetes.io/component: data-collector
+    spec:
+      containers:
+        - name: collector
+          # ⚠️ CAMBIAR por tu imagen del collector
+          # Ejemplo: tu-registry.com/sonarqube-collector:latest
+          image: sonarqube-collector:latest
+          imagePullPolicy: IfNotPresent
+          env:
+            # SonarQube
+            - name: SONARQUBE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: sonarqube-metrics-config
+                  key: SONARQUBE_URL
+            - name: SONARQUBE_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: sonarqube-metrics-secrets
+                  key: SONARQUBE_TOKEN
+            # PostgreSQL
+            - name: POSTGRES_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: sonarqube-metrics-config
+                  key: POSTGRES_HOST
+            - name: POSTGRES_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: sonarqube-metrics-config
+                  key: POSTGRES_PORT
+            - name: POSTGRES_DB
+              valueFrom:
+                configMapKeyRef:
+                  name: sonarqube-metrics-config
+                  key: POSTGRES_DB
+            - name: POSTGRES_USER
+              valueFrom:
+                secretKeyRef:
+                  name: sonarqube-metrics-secrets
+                  key: POSTGRES_USER
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: sonarqube-metrics-secrets
+                  key: POSTGRES_PASSWORD
+            # Collector config
+            - name: COLLECTION_INTERVAL
+              valueFrom:
+                configMapKeyRef:
+                  name: sonarqube-metrics-config
+                  key: COLLECTION_INTERVAL
+            - name: DATA_RETENTION_DAYS
+              valueFrom:
+                configMapKeyRef:
+                  name: sonarqube-metrics-config
+                  key: DATA_RETENTION_DAYS
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"
+      # Si necesitas pull de un registry privado, descomentar:
+      # imagePullSecrets:
+      #   - name: registry-credentials
+

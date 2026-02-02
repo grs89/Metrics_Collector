@@ -1,0 +1,21 @@
+apiVersion: 1
+
+datasources:
+  - name: PostgreSQL-Jenkins
+    uid: postgres-jenkins
+    type: postgres
+    url: jenkins-metrics-db:5432
+    database: jenkins_metrics
+    user: jenkins_metrics
+    secureJsonData:
+      password: jenkins_metrics_password
+    jsonData:
+      sslmode: disable
+      maxOpenConns: 10
+      maxIdleConns: 10
+      connMaxLifetime: 14400
+      postgresVersion: 1600
+      timescaledb: false
+    isDefault: true
+    editable: true
+

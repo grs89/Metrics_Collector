@@ -1,0 +1,100 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: metrics-db
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    volumes:
+      - metrics-db-data:/var/lib/postgresql/data
+      - ./postgres/init:/docker-entrypoint-initdb.d:ro
+    environment:
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-admin123}
+      - POSTGRES_DB=${POSTGRES_DB:-metrics_main}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-admin} -d ${POSTGRES_DB:-metrics_main}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - metrics-net
+
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: metrics-grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - metrics-grafana-data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    environment:
+      - GF_SECURITY_ADMIN_USER=${GRAFANA_USER:-admin}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+      - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-piechart-panel,grafana-simple-json-datasource
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - metrics-net
+
+  jenkins-exporter:
+    build:
+      context: ./exporters/jenkins
+      dockerfile: Dockerfile
+    container_name: jenkins-metrics-exporter
+    restart: unless-stopped
+    environment:
+      - JENKINS_URL=${JENKINS_URL}
+      - JENKINS_USER=${JENKINS_USER}
+      - JENKINS_TOKEN=${JENKINS_TOKEN}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=jenkins_metrics
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-admin123}
+      - POLL_INTERVAL=${JENKINS_POLL_INTERVAL:-60}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - metrics-net
+
+  sonarqube-collector:
+    build:
+      context: ./exporters/sonarqube
+      dockerfile: Dockerfile
+    container_name: sonarqube-metrics-collector
+    restart: unless-stopped
+    environment:
+      - SONARQUBE_URL=${SONARQUBE_URL}
+      - SONARQUBE_TOKEN=${SONARQUBE_TOKEN}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=sonarqube_metrics
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-admin123}
+      - COLLECTION_INTERVAL=${SONARQUBE_POLL_INTERVAL:-3600}
+      - DATA_RETENTION_DAYS=${DATA_RETENTION_DAYS:-365}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - metrics-net
+
+volumes:
+  metrics-db-data:
+    driver: local
+  metrics-grafana-data:
+    driver: local
+
+networks:
+  metrics-net:
+    driver: bridge

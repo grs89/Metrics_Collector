@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-service
+  namespace: jenkins-metrics
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: visualization
+    app.kubernetes.io/part-of: jenkins-metrics-collector
+spec:
+  type: ClusterIP
+  ports:
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: visualization
+---
+# Servicio NodePort para acceso externo (alternativa a Ingress)
+apiVersion: v1
+kind: Service
+metadata:
+  name: grafana-nodeport
+  namespace: jenkins-metrics
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: visualization
+    app.kubernetes.io/part-of: jenkins-metrics-collector
+spec:
+  type: NodePort
+  ports:
+    - port: 3000
+      targetPort: 3000
+      nodePort: 30300
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: visualization
+
+
+

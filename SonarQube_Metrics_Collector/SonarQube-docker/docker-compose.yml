@@ -1,0 +1,83 @@
+services:
+  # PostgreSQL - Base de datos para almacenar métricas históricas
+  postgres:
+    image: postgres:15-alpine
+    container_name: sonarqube-metrics-db
+    environment:
+      POSTGRES_DB: sonarqube_metrics
+      POSTGRES_USER: ${POSTGRES_USER:-metrics}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-metrics_password}
+    volumes:
+      - ./postgres_data:/var/lib/postgresql/data
+      - ./init-db:/docker-entrypoint-initdb.d:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-metrics} -d sonarqube_metrics"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - sonarqube-metrics
+
+  # Grafana - Visualización de métricas
+  grafana:
+    image: grafana/grafana:10.2.2
+    container_name: sonarqube-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_PASSWORD:-admin}
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_INSTALL_PLUGINS: grafana-clock-panel,grafana-simple-json-datasource
+    volumes:
+      - ./grafana_data:/var/lib/grafana
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - sonarqube-metrics
+
+  # Collector - Servicio para recolectar métricas de SonarQube
+  collector:
+    build:
+      context: ./collector
+      dockerfile: Dockerfile
+    container_name: sonarqube-collector
+    environment:
+      # Configuración de SonarQube
+      SONARQUBE_URL: ${SONARQUBE_URL:-http://localhost:9000}
+      SONARQUBE_TOKEN: ${SONARQUBE_TOKEN}
+      # Configuración de PostgreSQL
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: sonarqube_metrics
+      POSTGRES_USER: ${POSTGRES_USER:-metrics}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-metrics_password}
+      # Intervalo de recolección (en segundos) - por defecto cada hora
+      COLLECTION_INTERVAL: ${COLLECTION_INTERVAL:-3600}
+      # Retención de datos en días (365 días = 1 año)
+      DATA_RETENTION_DAYS: ${DATA_RETENTION_DAYS:-365}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - sonarqube-metrics
+
+volumes:
+  postgres_data:
+    name: sonarqube-metrics-postgres
+  grafana_data:
+    name: sonarqube-metrics-grafana
+
+networks:
+  sonarqube-metrics:
+    name: sonarqube-metrics-network
+    driver: bridge
+

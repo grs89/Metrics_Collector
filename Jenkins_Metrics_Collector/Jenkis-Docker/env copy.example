@@ -1,0 +1,54 @@
+# ============================================
+# Configuración de Jenkins Metrics Dashboard
+# ============================================
+# Copia este archivo a .env y ajusta los valores
+# cp env.example .env
+
+# --------------------------------------------
+# JENKINS - Configuración de tu servidor existente
+# --------------------------------------------
+
+# URL de tu servidor Jenkins
+# Ejemplos:
+#   - http://localhost:8080
+#   - http://jenkins.miempresa.com:8080
+#   - https://jenkins.miempresa.com
+JENKINS_URL=http://tu-servidor-jenkins:8080
+
+# Usuario de Jenkins con permisos de lectura
+JENKINS_USER=admin
+
+# Token API de Jenkins
+# Para obtenerlo:
+#   1. Inicia sesión en Jenkins
+#   2. Clic en tu nombre de usuario (esquina superior derecha)
+#   3. Configure → API Token → Add new Token
+#   4. Genera y copia el token aquí
+JENKINS_TOKEN=tu-api-token-aqui
+
+# --------------------------------------------
+# EXPORTADOR - Configuración del polling
+# --------------------------------------------
+
+# Intervalo en segundos entre cada consulta a Jenkins
+# Valores recomendados: 30-120 segundos
+# Menor = más actualizado pero más carga en Jenkins
+POLL_INTERVAL=60
+
+# --------------------------------------------
+# POSTGRESQL - Configuración de la base de datos
+# (Opcional - valores por defecto en docker-compose.yml)
+# --------------------------------------------
+
+POSTGRES_USER=jenkins_metrics
+POSTGRES_PASSWORD=jenkins_metrics_password
+POSTGRES_DB=jenkins_metrics
+
+# --------------------------------------------
+# GRAFANA - Configuración del dashboard
+# (Opcional - valores por defecto en docker-compose.yml)
+# --------------------------------------------
+
+GF_SECURITY_ADMIN_USER=admin
+GF_SECURITY_ADMIN_PASSWORD=admin
+

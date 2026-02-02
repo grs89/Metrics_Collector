@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-provisioning
+  namespace: jenkins-metrics
+  labels:
+    app.kubernetes.io/name: grafana
+    app.kubernetes.io/component: visualization
+    app.kubernetes.io/part-of: jenkins-metrics-collector
+data:
+  datasources.yml: |
+    apiVersion: 1
+
+    datasources:
+      - name: PostgreSQL-Jenkins
+        uid: postgres-jenkins
+        type: postgres
+        url: postgres-service:5432
+        database: jenkins_metrics
+        user: jenkins_metrics
+        secureJsonData:
+          password: jenkins_metrics_password
+        jsonData:
+          sslmode: disable
+          maxOpenConns: 10
+          maxIdleConns: 10
+          connMaxLifetime: 14400
+          postgresVersion: 1600
+          timescaledb: false
+        isDefault: true
+        editable: true
+
+  dashboards.yml: |
+    apiVersion: 1
+
+    providers:
+      - name: 'Jenkins Dashboards'
+        orgId: 1
+        folder: 'Jenkins'
+        folderUid: 'jenkins-folder'
+        type: file
+        disableDeletion: false
+        updateIntervalSeconds: 30
+        allowUiUpdates: true
+        options:
+          path: /var/lib/grafana/dashboards
+
+
+

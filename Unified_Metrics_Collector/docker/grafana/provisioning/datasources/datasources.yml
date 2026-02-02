@@ -1,0 +1,27 @@
+apiVersion: 1
+datasources:
+  - name: Jenkins Metrics
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: jenkins_metrics
+    user: ${POSTGRES_USER}
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    jsonData:
+      sslmode: 'disable'
+      postgresVersion: 15
+      timescaledb: false
+
+  - name: SonarQube Metrics
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: sonarqube_metrics
+    user: ${POSTGRES_USER}
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    jsonData:
+      sslmode: 'disable'
+      postgresVersion: 15
+      timescaledb: false

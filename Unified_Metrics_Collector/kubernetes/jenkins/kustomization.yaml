@@ -1,0 +1,56 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+metadata:
+  name: jenkins-metrics-collector
+
+namespace: jenkins-metrics
+
+# Recursos a aplicar
+resources:
+  # Namespace
+  - namespace.yaml
+  
+  # Secrets
+  - secrets/postgres-secret.yaml
+  - secrets/jenkins-secret.yaml
+  - secrets/grafana-secret.yaml
+  
+  # ConfigMaps
+  - configmaps/postgres-init-configmap.yaml
+  - configmaps/grafana-provisioning-configmap.yaml
+  - configmaps/grafana-dashboards-configmap.yaml
+  - configmaps/exporter-configmap.yaml
+  
+  # Storage
+  - storage/postgres-pvc.yaml
+  - storage/grafana-pvc.yaml
+  
+  # Deployments
+  - deployments/postgres-deployment.yaml
+  - deployments/grafana-deployment.yaml
+  - deployments/metrics-exporter-deployment.yaml
+  
+  # Services
+  - services/postgres-service.yaml
+  - services/grafana-service.yaml
+  
+  # Ingress (opcional)
+  # - ingress/grafana-ingress.yaml
+
+# Labels comunes para todos los recursos
+commonLabels:
+  app.kubernetes.io/part-of: jenkins-metrics-collector
+  app.kubernetes.io/managed-by: kustomize
+
+# Imágenes (para facilitar actualizaciones)
+images:
+  - name: postgres
+    newTag: "16-alpine"
+  - name: grafana/grafana
+    newTag: "10.2.0"
+  - name: jenkins-metrics-exporter
+    newTag: latest
+
+
+
