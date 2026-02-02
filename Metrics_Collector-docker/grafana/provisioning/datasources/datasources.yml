@@ -38,3 +38,29 @@ datasources:
       sslmode: 'disable'
       postgresVersion: 15
       timescaledb: false
+
+  - name: ArgoCD Metrics
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: argocd_metrics
+    user: ${POSTGRES_USER}
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    jsonData:
+      sslmode: 'disable'
+      postgresVersion: 15
+      timescaledb: false
+
+  - name: Mission Control
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: metrics_main
+    user: ${POSTGRES_USER}
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD}
+    jsonData:
+      sslmode: 'disable'
+      postgresVersion: 15
+      timescaledb: false

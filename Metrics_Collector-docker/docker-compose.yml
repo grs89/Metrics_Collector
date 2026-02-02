@@ -111,6 +111,28 @@ services:
     networks:
       - metrics-net
 
+  argocd-collector:
+    build:
+      context: ./exporters/argocd
+      dockerfile: Dockerfile
+    container_name: argocd-metrics-collector
+    restart: unless-stopped
+    environment:
+      - ARGOCD_URL=${ARGOCD_URL}
+      - ARGOCD_TOKEN=${ARGOCD_TOKEN}
+      - ARGOCD_POLL_INTERVAL=${ARGOCD_POLL_INTERVAL:-300}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_DB=argocd_metrics
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-admin123}
+      - DATA_RETENTION_DAYS=${DATA_RETENTION_DAYS:-365}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - metrics-net
+
 networks:
   metrics-net:
     driver: bridge

@@ -48,6 +48,30 @@ class JenkinsClient:
         self.session = requests.Session()
         if token:
             self.session.auth = self.auth
+
+def update_collector_health(name, status, details=""):
+    """Actualiza el estado de salud en la DB centralizada."""
+    try:
+        conn = psycopg2.connect(
+            host=POSTGRES_HOST,
+            port=POSTGRES_PORT,
+            database='metrics_main',
+            user=POSTGRES_USER,
+            password=POSTGRES_PASSWORD
+        )
+        with conn.cursor() as cur:
+            cur.execute("""
+                INSERT INTO collector_status (collector_name, status, details, last_run)
+                VALUES (%s, %s, %s, NOW())
+                ON CONFLICT (collector_name) DO UPDATE SET
+                    status = EXCLUDED.status,
+                    details = EXCLUDED.details,
+                    last_run = NOW()
+            """, (name, status, details))
+        conn.commit()
+        conn.close()
+    except Exception as e:
+        logger.error(f"Error actualizando salud centralizada: {e}")
         
     def _get(self, endpoint: str, params: Optional[dict] = None) -> Optional[dict]:
         """Realizar petición GET a Jenkins"""
@@ -349,9 +373,12 @@ def export_metrics(jenkins: JenkinsClient, postgres: PostgresExporter):
         
         if total_new_builds > 0:
             logger.info(f"Total: {total_new_builds} nuevos builds exportados")
+        
+        update_collector_health('jenkins', 'OK', f'Exportados {total_new_builds} builds')
                 
     except Exception as e:
         logger.error(f"Error durante la exportación: {e}")
+        update_collector_health('jenkins', 'ERROR', f'Error: {str(e)}')
 
 
 def main():

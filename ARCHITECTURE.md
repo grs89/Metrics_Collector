@@ -14,6 +14,7 @@ graph TD
         Jenkins["Jenkins Server"]
         Sonar["SonarQube Server"]
         Jira["Jira Software"]
+        Argo["ArgoCD Server"]
     end
 
     subgraph "Metrics Collector Infrastructure (Docker/K8s)"
@@ -21,6 +22,7 @@ graph TD
             JC["Jenkins Collector"]
             SC["SonarQube Collector"]
             JRC["Jira Collector"]
+            AC["ArgoCD Collector"]
         end
 
         subgraph "Storage & Visibility"
@@ -33,11 +35,14 @@ graph TD
     Jenkins -->|"API REST / JSON"| JC
     Sonar -->|"API REST / JSON"| SC
     Jira -->|"API REST / JSON"| JRC
+    Argo -->|"API REST / JSON"| AC
     
     JC -->|"SQL (jenkins_metrics)"| DB
     SC -->|"SQL (sonarqube_metrics)"| DB
     JRC -->|"SQL (jira_metrics)"| DB
+    AC -->|"SQL (argocd_metrics)"| DB
     
+    DB -->|"Health Heartbeat"| DB
     DB -->|"Data Source"| GF
     GF -->|"Visualization"| User((DevOps Team))
 

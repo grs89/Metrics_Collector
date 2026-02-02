@@ -42,6 +42,28 @@ class JiraCollector:
         
         if not self.jira_token:
             logger.warning("JIRA_TOKEN no está configurado. La conexión puede fallar.")
+            
+        # Config para tabla de salud centralizada
+        self.main_db_config = self.db_config.copy()
+        self.main_db_config['database'] = 'metrics_main'
+
+    def update_health(self, status, details=""):
+        """Actualiza el estado de salud en la DB centralizada."""
+        try:
+            conn = psycopg2.connect(**self.main_db_config)
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO collector_status (collector_name, status, details, last_run)
+                    VALUES ('jira', %s, %s, NOW())
+                    ON CONFLICT (collector_name) DO UPDATE SET
+                        status = EXCLUDED.status,
+                        details = EXCLUDED.details,
+                        last_run = NOW()
+                """, (status, details))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            logger.error(f"Error actualizando salud centralizada: {e}")
 
     def is_available(self) -> bool:
         """Verificar si Jira está disponible."""
@@ -189,12 +211,12 @@ class JiraCollector:
             
             # Limpieza
             with conn.cursor() as cur:
-                cur.execute("SELECT cleanup_old_jira_data(%s)", (self.retention_days,))
-                logger.info(f"Limpieza de datos antiguos completada (>{self.retention_days} días)")
                 conn.commit()
                 
+            self.update_health('OK', f'Recolección completada: {len(self.projects)} proyectos')
         except Exception as e:
             logger.error(f"Error en recolección de Jira: {e}")
+            self.update_health('ERROR', f'Error: {str(e)}')
             if conn: conn.rollback()
         finally:
             if conn: conn.close()

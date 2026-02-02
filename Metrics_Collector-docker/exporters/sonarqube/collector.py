@@ -61,6 +61,28 @@ class SonarQubeCollector:
         
         if not self.sonarqube_token:
             logger.warning("SONARQUBE_TOKEN no está configurado. Algunas APIs pueden no estar disponibles.")
+        
+        # Config para tabla de salud centralizada
+        self.main_db_config = self.db_config.copy()
+        self.main_db_config['database'] = 'metrics_main'
+
+    def update_health(self, status, details=""):
+        """Actualiza el estado de salud en la DB centralizada."""
+        try:
+            conn = psycopg2.connect(**self.main_db_config)
+            with conn.cursor() as cur:
+                cur.execute("""
+                    INSERT INTO collector_status (collector_name, status, details, last_run)
+                    VALUES ('sonarqube', %s, %s, NOW())
+                    ON CONFLICT (collector_name) DO UPDATE SET
+                        status = EXCLUDED.status,
+                        details = EXCLUDED.details,
+                        last_run = NOW()
+                """, (status, details))
+            conn.commit()
+            conn.close()
+        except Exception as e:
+            logger.error(f"Error actualizando salud centralizada: {e}")
     
     def is_available(self) -> bool:
         """Verificar si SonarQube está disponible."""
