@@ -1,4 +1,4 @@
-# Metrics Collector All-in-One
+# Metrics Collector All-in-One.
 
 Este proyecto consolida los colectores de métricas de **Jenkins** y **SonarQube** en una única solución unificada, optimizando recursos mediante el uso compartido de infraestructura (Postgres y Grafana).
 
