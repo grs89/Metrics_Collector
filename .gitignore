@@ -2,8 +2,8 @@
 .env
 
 # Docker data
-docker/postgres/metrics-db-data/
-docker/grafana/metrics-grafana-data/
+Metrics_Collector-docker/postgres/metrics-db-data/
+Metrics_Collector-docker/grafana/metrics-grafana-data/
 
 # Python
 __pycache__/

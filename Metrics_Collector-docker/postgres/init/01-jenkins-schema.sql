@@ -1,6 +1,8 @@
 -- Esquema de base de datos para métricas de Jenkins
 -- Con retención automática de 1 año
 
+\c jenkins_metrics
+
 -- Tabla principal de builds
 CREATE TABLE jenkins_builds (
     id SERIAL PRIMARY KEY,

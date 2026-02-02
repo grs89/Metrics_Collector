@@ -1,6 +1,8 @@
 -- Esquema de base de datos para métricas de SonarQube
 -- Retención de datos: 1 año (365 días)
 
+\c sonarqube_metrics
+
 -- Tabla de proyectos
 CREATE TABLE IF NOT EXISTS projects (
     id SERIAL PRIMARY KEY,
