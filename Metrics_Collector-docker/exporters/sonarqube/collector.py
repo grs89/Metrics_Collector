@@ -18,7 +18,7 @@ import schedule
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
-    datefmt='%Y-%m-%d %H:%M:%S'
+    handlers=[logging.StreamHandler(sys.stdout)]
 )
 logger = logging.getLogger(__name__)
 
@@ -61,6 +61,17 @@ class SonarQubeCollector:
         
         if not self.sonarqube_token:
             logger.warning("SONARQUBE_TOKEN no está configurado. Algunas APIs pueden no estar disponibles.")
+    
+    def is_available(self) -> bool:
+        """Verificar si SonarQube está disponible."""
+        try:
+            # Intentar acceder a un endpoint público simple
+            url = f"{self.sonarqube_url}/api/system/health"
+            response = requests.get(url, timeout=10)
+            # SonarQube puede responder 200 o 401/403 si requiere auth, ambos significan que el servicio responde
+            return response.status_code in [200, 401, 403]
+        except Exception:
+            return False
     
     def get_db_connection(self):
         """Obtiene conexión a PostgreSQL."""
@@ -299,21 +310,32 @@ class SonarQubeCollector:
                 conn.close()
 
 
-def wait_for_postgres(max_retries=30, delay=2):
-    """Espera a que PostgreSQL esté disponible."""
+def wait_for_services(max_retries=30, delay=10):
+    """Espera a que SonarQube y PostgreSQL estén disponibles."""
     collector = SonarQubeCollector()
     
+    logger.info("Esperando a que los servicios estén disponibles...")
+    
     for attempt in range(max_retries):
+        sonarqube_ready = collector.is_available()
+        postgres_ready = False
+        
         try:
             conn = collector.get_db_connection()
             conn.close()
-            logger.info("Conexión a PostgreSQL establecida")
+            postgres_ready = True
+        except Exception:
+            pass
+            
+        if sonarqube_ready and postgres_ready:
+            logger.info("✓ Todos los servicios están disponibles")
             return True
-        except psycopg2.OperationalError:
-            logger.info(f"Esperando a PostgreSQL... intento {attempt + 1}/{max_retries}")
-            time.sleep(delay)
+        
+        status = f"SonarQube: {'✓' if sonarqube_ready else '✗'}, PostgreSQL: {'✓' if postgres_ready else '✗'}"
+        logger.info(f"Esperando... {status} ({attempt + 1}/{max_retries})")
+        time.sleep(delay)
     
-    logger.error("No se pudo conectar a PostgreSQL")
+    logger.error("Timeout esperando servicios")
     return False
 
 
@@ -328,8 +350,8 @@ def main():
     logger.info(f"Intervalo de recolección: {collection_interval} segundos")
     logger.info(f"Retención de datos: {os.environ.get('DATA_RETENTION_DAYS', 365)} días")
     
-    # Esperar a PostgreSQL
-    if not wait_for_postgres():
+    # Esperar a los servicios
+    if not wait_for_services():
         sys.exit(1)
     
     collector = SonarQubeCollector()
