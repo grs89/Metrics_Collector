@@ -1,0 +1,111 @@
+{
+    "annotations": {
+        "list": []
+    },
+    "editable": true,
+    "panels": [
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "Git Metrics"
+            },
+            "fieldConfig": {
+                "defaults": {
+                    "color": {
+                        "mode": "thresholds"
+                    },
+                    "mappings": [],
+                    "thresholds": {
+                        "mode": "absolute",
+                        "steps": [
+                            {
+                                "color": "green",
+                                "value": null
+                            },
+                            {
+                                "color": "orange",
+                                "value": 24
+                            },
+                            {
+                                "color": "red",
+                                "value": 72
+                            }
+                        ]
+                    },
+                    "unit": "h"
+                }
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 0
+            },
+            "id": 1,
+            "options": {
+                "colorMode": "value",
+                "graphMode": "area",
+                "justifyMode": "auto",
+                "orientation": "auto",
+                "reduceOptions": {
+                    "calcs": [
+                        "mean"
+                    ],
+                    "fields": "",
+                    "values": false
+                },
+                "textMode": "auto"
+            },
+            "targets": [
+                {
+                    "format": "table",
+                    "rawQuery": true,
+                    "sql": "SELECT lead_time_hours FROM lead_time_metrics"
+                }
+            ],
+            "title": "Avg Lead Time for Changes (Merged PRs)",
+            "type": "stat"
+        },
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "Git Metrics"
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 12,
+                "y": 0
+            },
+            "id": 2,
+            "options": {
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "format": "table",
+                    "rawQuery": true,
+                    "sql": "SELECT full_name as repository, count(pr.id) as total_prs FROM repositories r JOIN pull_requests pr ON r.id = pr.repo_id GROUP BY full_name"
+                }
+            ],
+            "title": "PRs by Repository",
+            "type": "table"
+        }
+    ],
+    "refresh": "1m",
+    "schemaVersion": 38,
+    "style": "dark",
+    "tags": [
+        "git",
+        "dora"
+    ],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-7d",
+        "to": "now"
+    },
+    "title": "Git DORA Metrics",
+    "uid": "git-dora-metrics"
+}

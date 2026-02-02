@@ -18,5 +18,7 @@ VALUES
     ('jenkins', 'UNKNOWN', 'Esperando primera ejecución...'),
     ('sonarqube', 'UNKNOWN', 'Esperando primera ejecución...'),
     ('jira', 'UNKNOWN', 'Esperando primera ejecución...'),
-    ('argocd', 'UNKNOWN', 'Esperando primera ejecución...')
+    ('argocd', 'UNKNOWN', 'Esperando primera ejecución...'),
+    ('argorollouts', 'UNKNOWN', 'Esperando primera ejecución...'),
+    ('git', 'UNKNOWN', 'Esperando primera ejecución...')
 ON CONFLICT (collector_name) DO NOTHING;

@@ -1,0 +1,54 @@
+{
+    "annotations": {
+        "list": []
+    },
+    "editable": true,
+    "fiscalYearStartMonth": 0,
+    "graphTooltip": 0,
+    "id": null,
+    "links": [],
+    "liveNow": false,
+    "panels": [
+        {
+            "datasource": {
+                "type": "postgres",
+                "uid": "Argo Rollouts Metrics"
+            },
+            "gridPos": {
+                "h": 8,
+                "w": 24,
+                "x": 0,
+                "y": 0
+            },
+            "id": 1,
+            "options": {
+                "showHeader": true
+            },
+            "targets": [
+                {
+                    "format": "table",
+                    "rawQuery": true,
+                    "sql": "SELECT name, namespace, status, updated_at FROM rollouts ORDER BY updated_at DESC"
+                }
+            ],
+            "title": "Active Rollouts Status",
+            "type": "table"
+        }
+    ],
+    "refresh": "30s",
+    "schemaVersion": 38,
+    "style": "dark",
+    "tags": [
+        "argorollouts",
+        "cd"
+    ],
+    "templating": {
+        "list": []
+    },
+    "time": {
+        "from": "now-1h",
+        "to": "now"
+    },
+    "title": "Argo Rollouts Overview",
+    "uid": "argorollouts-overview"
+}

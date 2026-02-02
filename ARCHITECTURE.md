@@ -23,6 +23,8 @@ graph TD
             SC["SonarQube Collector"]
             JRC["Jira Collector"]
             AC["ArgoCD Collector"]
+            ARC["Argo Rollouts Collector"]
+            GC["Git Collector<br/>(GitHub/GitLab)"]
         end
 
         subgraph "Storage & Visibility"
@@ -36,11 +38,15 @@ graph TD
     Sonar -->|"API REST / JSON"| SC
     Jira -->|"API REST / JSON"| JRC
     Argo -->|"API REST / JSON"| AC
+    Argo -->|"API Rollouts"| ARC
+    GitHub["GitHub/GitLab"] -->|"Webhooks/API"| GC
     
     JC -->|"SQL (jenkins_metrics)"| DB
     SC -->|"SQL (sonarqube_metrics)"| DB
     JRC -->|"SQL (jira_metrics)"| DB
     AC -->|"SQL (argocd_metrics)"| DB
+    ARC -->|"SQL (rollouts_metrics)"| DB
+    GC -->|"SQL (git_metrics)"| DB
     
     DB -->|"Health Heartbeat"| DB
     DB -->|"Data Source"| GF
