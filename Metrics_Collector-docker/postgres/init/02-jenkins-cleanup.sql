@@ -1,4 +1,6 @@
 -- Script para configurar limpieza automática de datos antiguos
+\c jenkins_metrics
+
 -- Ejecutar cleanup_old_builds() semanalmente para mantener retención de 1 año
 
 -- Crear extensión pg_cron si está disponible (solo funciona en algunas instalaciones de PostgreSQL)

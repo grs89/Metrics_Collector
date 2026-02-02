@@ -87,12 +87,6 @@ services:
     networks:
       - metrics-net
 
-volumes:
-  metrics-db-data:
-    driver: local
-  metrics-grafana-data:
-    driver: local
-
 networks:
   metrics-net:
     driver: bridge
