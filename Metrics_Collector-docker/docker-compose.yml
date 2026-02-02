@@ -179,6 +179,26 @@ services:
     networks:
       - metrics-net
 
+  notifier:
+    build:
+      context: ./exporters/notifier
+      dockerfile: Dockerfile
+    container_name: metrics-notifier
+    restart: unless-stopped
+    environment:
+      - DISCORD_WEBHOOK_URL=${DISCORD_WEBHOOK_URL}
+      - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
+      - FAILED_BUILD_THRESHOLD=${FAILED_BUILD_THRESHOLD:-20}
+      - POSTGRES_HOST=postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-admin}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-admin123}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - metrics-net
+
 networks:
   metrics-net:
     driver: bridge

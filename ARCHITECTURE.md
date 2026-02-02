@@ -25,6 +25,7 @@ graph TD
             AC["ArgoCD Collector"]
             ARC["Argo Rollouts Collector"]
             GC["Git Collector<br/>(GitHub/GitLab)"]
+            NC["Notifier Service<br/>(Alert Manager)"]
         end
 
         subgraph "Storage & Visibility"
@@ -47,6 +48,9 @@ graph TD
     AC -->|"SQL (argocd_metrics)"| DB
     ARC -->|"SQL (rollouts_metrics)"| DB
     GC -->|"SQL (git_metrics)"| DB
+    
+    DB -->|"Monitor Health/Stats"| NC
+    NC -->|"Alerts (Webhook)"| ExtChannels["Slack / Discord"]
     
     DB -->|"Health Heartbeat"| DB
     DB -->|"Data Source"| GF
@@ -89,5 +93,32 @@ El núcleo de los recolectores ha sido diseñado para operar de forma autónoma 
 
 ---
 
+## 🧱 Componentes del Sistema
+
+| Componente | Rol | Tecnología |
+| :--- | :--- | :--- |
+| **Collectors** | Extraen datos de APIs externas (REST/JSON) y los normalizan. | Python 3.11 + psycopg2 |
+| **PostgreSQL** | Almacenamiento persistente con bases de datos aisladas por servicio. | PostgreSQL 15 |
+| **Health Check** | Sistema de "Heartbeat" donde cada colector reporta su estado. | SQL (Central DB) |
+| **Grafana** | Visualización multifuente y gestión de alertas. | Grafana 10 |
+
+## 🔄 Flujo de Datos
+
+1.  **Ingesta**: El colector (ej. Jenkins) despierta periódicamente, consulta la API remota y filtra los datos nuevos.
+2.  **Persistencia**: Los datos se insertan en su base de datos dedicada (ej. `jenkins_metrics`).
+3.  **Salud**: Al finalizar la tarea, el colector actualiza la tabla `collector_status` en la base de datos `metrics_main`.
+4.  **Visualización**: Grafana consulta ambas bases de datos:
+    *   `metrics_main`: Para el panel de Mission Control (Salud).
+    *   `*_metrics`: Para los paneles de métricas específicas (Negocio/Ingeniería).
+
+## 🛡️ Estándares de Implementación
+
+Para asegurar la robustez, todos los colectores siguen este patrón:
+1.  **Wait-for-Services**: No inician hasta que Postgres esté listo.
+2.  **Data Retention**: Ejecutan una función SQL de limpieza para no saturar el disco.
+3.  **Stateless**: Pueden reiniciarse en cualquier momento sin pérdida de datos consistentes.
+
+---
+
 > [!NOTE]  
-> Esta arquitectura está lista para escalabilidad horizontal. Se pueden añadir más colectores (ej. Jira, ArgoCD) simplemente añadiendo servicios que apunten a la misma instancia de `metrics-db`.
+> Esta arquitectura está lista para escalabilidad horizontal. Se pueden añadir más colectores simplemente añadiendo servicios que apunten a la misma instancia de `metrics-db`.

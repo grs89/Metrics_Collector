@@ -28,16 +28,26 @@ Una solución integral y unificada para la recolección, almacenamiento y visual
 
 ```text
 .
-├── Metrics_Collector-docker/    # Configuración de contenedores local/vps
-│   ├── exporters/               # Código fuente de los recolectores Python
-│   ├── grafana/                 # Provisioning de dashboards y datasources
-│   ├── postgres/                # Scripts de inicialización y datos
-│   └── docker-compose.yml       # Orquestación de servicios
-├── Metrics_Collector-kubernetes/# Manifiestos para infraestructura cloud
-│   ├── base/                    # Infraestructura compartida (Postgres, Grafana)
-│   ├── jenkins/                 # Manifiestos específicos del recolector Jenkins
-│   └── sonarqube/               # Manifiestos específicos del recolector SonarQube
-└── README.md                    # Documentación principal
+├── Metrics_Collector-docker/         # Configuración para Docker Compose
+│   ├── .env.example                  # Variables de entorno de referencia
+│   ├── docker-compose.yml            # Orquestación de todos los servicios
+│   ├── exporters/                    # Fuente de los recolectores (Python 3.11)
+│   │   ├── argocd/                   # Recolector de Apps ArgoCD
+│   │   ├── argorollouts/             # Recolector de Canary Rollouts
+│   │   ├── git/                      # Recolector DORA (GitHub/GitLab)
+│   │   ├── jenkins/                  # Recolector de Jobs y Builds
+│   │   ├── jira/                     # Recolector de Tickets y Sprints
+│   │   └── sonarqube/                # Recolector de Calidad de Código
+│   ├── grafana/                      # Visualización y Provisioning
+│   │   ├── dashboards/               # Definiciones JSON de dashboards
+│   │   └── provisioning/             # Configuración automática de Grafana
+│   └── postgres/                     # Persistencia de Datos
+│       └── init/                     # Scripts SQL de inicialización (00-07)
+├── Metrics_Collector-kubernetes/      # Manifiestos para K8s (Kustomize)
+│   ├── base/                         # Infraestructura base (DB, Grafana)
+│   └── [collector]/                  # Manifiestos por cada servicio
+├── ARCHITECTURE.md                   # Diagramas y flujo de datos
+└── README.md                         # Esta guía
 ```
 
 ---
